@@ -136,7 +136,7 @@ public class ConceptVuforiaUltimateGoalNavigation extends LinearOpMode {
          * If no camera monitor is desired, use the parameter-less constructor instead (commented out below).
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId); //Sending what camera is seeing to the screen(?)
 
         // VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
@@ -263,7 +263,7 @@ public class ConceptVuforiaUltimateGoalNavigation extends LinearOpMode {
 
             // check all the trackable targets to see which one (if any) is visible.
             targetVisible = false;
-            for (VuforiaTrackable trackable : allTrackables) {
+            for (VuforiaTrackable trackable : allTrackables) { //VuforiaTrackable is an image I think
                 if (((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible()) {
                     telemetry.addData("Visible Target", trackable.getName());
                     targetVisible = true;
@@ -275,7 +275,7 @@ public class ConceptVuforiaUltimateGoalNavigation extends LinearOpMode {
                         lastLocation = robotLocationTransform;
                     }
                     break;
-                }
+                } //Calculate our position based on the images around us
             }
 
             // Provide feedback as to where the robot is located (if we know).

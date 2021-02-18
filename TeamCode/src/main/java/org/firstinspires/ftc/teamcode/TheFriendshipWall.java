@@ -9,4 +9,5 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 public class TheFriendshipWall {
     DcMotor motor1;
 
+        //Andy Smithwick
 }
