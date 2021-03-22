@@ -49,10 +49,10 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
     //Directions
-    private static final int FORWARD = 0;
-    private static final int BACKWARDS = 1;
-    private static final int STRAFE_RIGHT = 2;
-    private static final int STRAFE_LEFT = 3;
+    public static final int FORWARD = 0;
+    public static final int BACKWARDS = 1;
+    public static final int STRAFE_RIGHT = 2;
+    public static final int STRAFE_LEFT = 3;
     //static final int FREEFORM = 4;
     private static final int UP = 0;
     private static final int DOWN = 1;
@@ -117,8 +117,13 @@ public abstract class Auto_Abstract extends LinearOpMode {
      * f
      * */
 
+    //Robot Info
+    public static final double ROBOTLENGTH = 18;
+    public static final double ROBOTWIDTH = 18;
 
-
+    //Field Info
+    public static final double TILE_WIDTH_NO_TEETH = 22.75;
+    public static final double TILE_WIDTH_YES_TEETH = 23.5;
 
 
     public void delay(){
