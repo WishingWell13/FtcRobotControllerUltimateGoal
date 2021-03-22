@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.archive;
 
 import android.graphics.Color;
 
@@ -6,12 +6,14 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 //import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 //import com.qualcomm.robotcore.hardware.Gamepad;
 //import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 //import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.SwitchableLight;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -24,16 +26,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 //imports
 
 
-public abstract class Auto_Abstract extends LinearOpMode {
+public abstract class Auto_AbstractOld extends LinearOpMode {
     //variables
-    public DcMotor lf, rf, lb, rb, ls, armMotor; //Define Motors In Code
-    public Gamepad g1, g2;
-    ColorSensor colorSensor, bottomRingColor, topRingColor;    // Hardware Device Object
-    //ColorSensor colorRev, colorLineRev;
-    //DistanceSensor sensorDistance, distanceLineRev;
+    private DcMotor lf, rf, lb, rb, ls;
+    //public Gamepad g1, g2;
+    private Servo clawL, clawR, hook, capServo;
+    private ColorSensor colorSensor, skyStoneColor;    // Hardware Device Object
 
 
-    public Servo wobbleClaw;
+    ColorSensor colorRev, colorLineRev;
+    private DistanceSensor sensorDistance/*, distanceLineRev*/;
     private BNO055IMU imu;
 
     //NormalizedRGBA colors = colorRev.getNormalizedColors();
@@ -120,6 +122,14 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
 
 
+    public double getGrayLum(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorSensor.alpha();
+        }
+        gray /= 300;
+        return gray;
+    }
 
     public void delay(){
         int delay = 0;
@@ -144,7 +154,66 @@ public abstract class Auto_Abstract extends LinearOpMode {
         }
     }
 
+    double getGrayBlue(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorSensor.blue();
+        }
+        gray /= 300;
+        return gray;
+    }
+    double getGrayRed(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorSensor.red();
+        }
+        gray /= 300;
+        return gray;
+    }
 
+    public double getGrayLumRev(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorLineRev.alpha();
+        }
+        gray /= 300;
+        return gray;
+    }
+
+    public double getGrayBlueRev(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorLineRev.blue();
+        }
+        gray /= 300;
+        return gray;
+    }
+    double getGrayRedRev(){
+        gray = 0;
+        for (int i = 1; i <= 300; i ++){
+            gray += colorLineRev.red();
+        }
+        gray /= 300;
+        return gray;
+    }
+
+    public double getBlockLum(){
+        yellow = 0;
+        for (int i = 1; i <= 300; i ++){
+            yellow += colorRev.alpha();
+        }
+        yellow /= 300;
+        return yellow;
+    }
+
+    public double getBlockRed(){
+        yellow = 0;
+        for (int i = 1; i <= 300; i ++){
+            yellow += colorRev.alpha();
+        }
+        yellow /= 300;
+        return yellow;
+    }
 
     private double getHeadingRad()
     {
@@ -416,16 +485,25 @@ public abstract class Auto_Abstract extends LinearOpMode {
         lb = hardwareMap.dcMotor.get("lb");
         rb = hardwareMap.dcMotor.get("rb");
         ls = hardwareMap.dcMotor.get("ls");
-        //Motor Define In Phone
-        lf = hardwareMap.dcMotor.get("lf");
-        rf = hardwareMap.dcMotor.get("rf");
-        lb = hardwareMap.dcMotor.get("lb");
-        rb = hardwareMap.dcMotor.get("rb");
-        ls = hardwareMap.dcMotor.get("ls");
+        //Servo Define
+        clawL = hardwareMap.servo.get("clawL");
+        clawR = hardwareMap.servo.get("clawR");
+        capServo = hardwareMap.servo.get("capper");
+        hook = hardwareMap.servo.get("hook");
 
-        armMotor = hardwareMap.dcMotor.get("armMotor");
+        colorSensor = hardwareMap.get(ColorSensor.class, "color");
+        skyStoneColor = hardwareMap.get(ColorSensor.class, "SkyColor");
+        // get a reference to the color sensor.
+        colorRev = hardwareMap.get(ColorSensor.class, "colorRev");
+        colorLineRev = hardwareMap.get(ColorSensor.class, "colorLine");
+        // get a reference to the distance sensor that shares the same name.
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "colorRev");
 
-        wobbleClaw = hardwareMap.servo.get("wobbleClaw");
+        colorSensor.enableLed(bLedOn);
+        skyStoneColor.enableLed(bLedOn);
+        if (colorRev instanceof SwitchableLight) {
+            ((SwitchableLight)colorRev).enableLight(true);
+        }
 
         //------------------------------------------------------------------------------------------------------//
         //Gyro Stuff
@@ -471,7 +549,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
         lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         //----------------------------------------------------------------------------------------------------------------//
         //Foundation Only
         //Move 120 Inches
@@ -965,9 +1043,270 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
 
     }
+    public void monoColorLineRev(double power, double color, int direction, int target, int errorE) { //parameters: When you use the function, the code will ask for these two variables
+
+        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
 
+
+
+
+
+        double sPower = 0.4;
+        double lfPower = 0;
+        double rfPower = 0;
+        double lbPower = 0;
+        double rbPower = 0;
+
+        switch(direction){
+            case FORWARD:
+
+
+                lfPower = -power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = -power;
+                break;
+
+
+            case BACKWARDS:
+
+                lfPower = power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = power;
+                break;
+            case STRAFE_RIGHT:
+
+
+                lfPower = -power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = -power;
+
+                break;
+            case STRAFE_LEFT:
+
+                lfPower = power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = power;
+                break;
+        }
+
+
+
+        lf.setPower(lfPower);
+        rf.setPower(rfPower);
+        lb.setPower(lbPower);
+        rb.setPower(rbPower);
+
+        int error = 42;
+
+        Color.RGBToHSV((int) (colorLineRev.red() * SCALE_FACTOR),
+                (int) (colorLineRev.green() * SCALE_FACTOR),
+                (int) (colorLineRev.blue() * SCALE_FACTOR),
+                hsvValues);
+
+        switch (target) {
+            case RED:
+                while (opModeIsActive() && (colorLineRev.red() < color + (0.2 * (color))&&
+                        (Math.abs(rb.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH)) &&
+                        (Math.abs(rf.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH))&&
+                        (Math.abs(lb.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH)) &&
+                        (Math.abs(lf.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH)))) {
+                    idle();
+                    telemetry.addData("Red  ", colorSensor.red());
+                    telemetry.addData("lf", lf.getCurrentPosition());
+                    telemetry.update();
+                }
+                break;
+            case GREEN:
+                while (opModeIsActive() && (colorLineRev.green() < color + (0.2 * (color)))
+                        &&
+                        (rb.getCurrentPosition() < (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() < (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() < (errorE*COUNTS_PER_INCH))){
+                    idle();
+                    telemetry.addData("Green", colorSensor.green());
+                }
+                break;
+            case BLUE:
+                while (opModeIsActive() && (colorLineRev.blue() < color + (0.2 * (color))) &&
+                        (Math.abs(rb.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH)) &&
+                        (Math.abs(rf.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH))&&
+                        (Math.abs(lb.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH)) &&
+                        (Math.abs(lf.getCurrentPosition()) <= (errorE*COUNTS_PER_INCH))) {
+                    idle();
+                    telemetry.addData("Blue ", colorSensor.blue());
+                }
+                break;
+            case LUM:
+                while (opModeIsActive() && (colorLineRev.alpha() < color *1.2) &&
+                        (rb.getCurrentPosition() < (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() < (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() < (errorE*COUNTS_PER_INCH))) {
+                    idle();
+                    telemetry.addData("Clear", colorSensor.alpha());
+                }
+
+        }
+
+        lf.setPower(0);
+        rf.setPower(0);
+        lb.setPower(0);
+        rb.setPower(0);
+
+
+    }
+
+    public void monoColorSkyRev(double power, double color, int direction, int target, int errorE) { //parameters: When you use the function, the code will ask for these two variables
+
+        lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        Color.RGBToHSV((int) (colorRev.red() * SCALE_FACTOR),
+                (int) (colorRev.green() * SCALE_FACTOR),
+                (int) (colorRev.blue() * SCALE_FACTOR),
+                hsvValues);
+
+
+
+
+
+        double sPower = 0.4;
+        double lfPower = 0;
+        double rfPower = 0;
+        double lbPower = 0;
+        double rbPower = 0;
+
+        switch(direction){
+            case FORWARD:
+
+
+                lfPower = power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = power;
+                break;
+
+
+            case BACKWARDS:
+
+                lfPower = -power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = -power;
+                break;
+            case STRAFE_RIGHT:
+
+
+                lfPower = -power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = -power;
+                break;
+            case STRAFE_LEFT:
+
+                lfPower = power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = power;
+                break;
+        }
+
+
+
+        lf.setPower(lfPower);
+        rf.setPower(rfPower);
+        lb.setPower(lbPower);
+        rb.setPower(rbPower);
+
+        //NormalizedRGBA colors = colorRev.getNormalizedColors(); //Ask NormalizedColor VS Color
+
+        //Yellow Block Red Reading: 191
+        //Yellow Block Green reading: 300
+        //No Block Red Reading: 118
+        //Skystone Red Reading: 112
+
+        switch (target) {
+            case RED:
+                while (opModeIsActive() && (colorRev.red() >= color - (0.04 * (color+0.1)))
+                        &&
+                        (rb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)))  {
+                    idle();
+                    telemetry.addData("Red  ", colorRev.red());
+                }
+                break;
+            case GREEN:
+                while (opModeIsActive() && (colorRev.green() >= color - (0.04 * (color+0.1)))
+                        &&
+                        (rb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))) {
+                    idle();
+                    telemetry.addData("Green", colorRev.green());
+                }
+                break;
+            case BLUE:
+                while (opModeIsActive() && (colorRev.blue() >= color - (0.04 * (color+0.1)))
+                        &&
+                        (rb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))) {
+                    idle();
+                    telemetry.addData("Blue ", colorRev.blue());
+                    /*while (sensorDistance.getDistance(DistanceUnit.CM) >= errorR){
+                        drive(0.4, 0.1,direction);
+                    }*/
+                }
+                break;
+            case LUM:
+                while (opModeIsActive() && (colorRev.alpha() >= color - (0.04 * (color+0.1)))
+                        &&
+                        (rb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (rf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))&&
+                        (lb.getCurrentPosition() <= (errorE*COUNTS_PER_INCH)) &&
+                        (lf.getCurrentPosition() <= (errorE*COUNTS_PER_INCH))) {
+                    idle();
+                    telemetry.addData("Clear", colorRev.alpha());
+                    /*while (sensorDistance.getDistance(DistanceUnit.CM) >= errorR){
+                        drive(0.4, 0.1,direction);
+                    }*/
+                }
+
+        }
+
+        lf.setPower(0);
+        rf.setPower(0);
+        lb.setPower(0);
+        rb.setPower(0);
+
+
+    }
 
     public void monoColorDriveSky(double power, double color, int direction, int target, int errorE) { //parameters: When you use the function, the code will ask for these two variables
         //for Modern Robotics Color Sensor
@@ -1039,43 +1378,43 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
         switch (target) {
             case RED:
-                while (opModeIsActive() && (bottomRingColor.red() >= color) &&
+                while (opModeIsActive() && (skyStoneColor.red() >= color) &&
                         (rb.getCurrentPosition() <= (36*COUNTS_PER_INCH)) &&
                         (rf.getCurrentPosition() <= (36*COUNTS_PER_INCH))&&
                         (lb.getCurrentPosition() <= (36*COUNTS_PER_INCH)) &&
                         (lf.getCurrentPosition() <= (36*COUNTS_PER_INCH))){
                     idle();
-                    telemetry.addData("Red Sky ", bottomRingColor.red());
+                    telemetry.addData("Red Sky ", skyStoneColor.red());
                 }
                 break;
             case GREEN:
-                while (opModeIsActive() && (bottomRingColor.green() >= color)&&
+                while (opModeIsActive() && (skyStoneColor.green() >= color)&&
                         (rb.getCurrentPosition() < (36*COUNTS_PER_INCH)) &&
                         (rf.getCurrentPosition() < (36*COUNTS_PER_INCH))&&
                         (lb.getCurrentPosition() <= (36*COUNTS_PER_INCH)) &&
                         (lf.getCurrentPosition() < (36*COUNTS_PER_INCH))) {
                     idle();
-                    telemetry.addData("Green Sky ", bottomRingColor.green());
+                    telemetry.addData("Green Sky ", skyStoneColor.green());
                 }
                 break;
             case BLUE:
-                while (opModeIsActive() && (bottomRingColor.blue() >= color)&&
+                while (opModeIsActive() && (skyStoneColor.blue() >= color)&&
                         (rb.getCurrentPosition() < (36*COUNTS_PER_INCH)) &&
                         (rf.getCurrentPosition() < (36*COUNTS_PER_INCH))&&
                         (lb.getCurrentPosition() <= (36*COUNTS_PER_INCH)) &&
                         (lf.getCurrentPosition() < (36*COUNTS_PER_INCH))) {
                     idle();
-                    telemetry.addData("Blue Sky ", bottomRingColor.blue());
+                    telemetry.addData("Blue Sky ", skyStoneColor.blue());
                 }
                 break;
             case LUM:
-                while (opModeIsActive() && (bottomRingColor.alpha() >= color)&&
+                while (opModeIsActive() && (skyStoneColor.alpha() >= color)&&
                         (rb.getCurrentPosition() < (36*COUNTS_PER_INCH)) &&
                         (rf.getCurrentPosition() < (36*COUNTS_PER_INCH))&&
                         (lb.getCurrentPosition() <= (36*COUNTS_PER_INCH)) &&
                         (lf.getCurrentPosition() < (36*COUNTS_PER_INCH))) {
                     idle();
-                    telemetry.addData("Clear Sky ", bottomRingColor.alpha());
+                    telemetry.addData("Clear Sky ", skyStoneColor.alpha());
                 }
 
         }
@@ -1095,21 +1434,49 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
 
     //----------Other--------------------Other---------------Other
+    public void hook(int direction){
+        switch (direction) {
+            case UP:
+                hook.setPosition(.9);
+                //sleep(1200);
+                break;
+            case DOWN:
+                hook.setPosition(0.15);
+                //sleep(1200);
+                break;
+        }
+    }
 
-
-
+    public void capServo(int state){
+        if(state == UP) {
+            capServo.setPosition(1);
+        }
+        else {
+            capServo.setPosition(0.2);
+        }
+    }
 
     public void claw(int state){
         switch (state){
             case CLOSE:
-                wobbleClaw.setPosition(0.1);
+                clawR.setPosition(.7); // close claw
+                clawL.setPosition(.20);
                 sleep(500);
                 break;
             case OPEN:
-                wobbleClaw.setPosition(0.9);
+                clawR.setPosition(.13); //open claw
+                clawL.setPosition(.8);
                 sleep(500);
                 break;
-
+            case PART:
+                clawR.setPosition(.55); //partial claw
+                clawL.setPosition(.4);
+                sleep(500);
+                break;
+            case SUP_PART:
+                clawR.setPosition(.53); //partial claw
+                clawL.setPosition(.42);
+                sleep(200);
         }
 
     }
@@ -1189,4 +1556,3 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
 
 }
-
