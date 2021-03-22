@@ -30,13 +30,15 @@ import static android.os.SystemClock.sleep;
 //to do:
 public abstract class TeleOp_Abstract extends OpMode {
 
-    public DcMotor lf, rf, lb, rb, ls; //Define Motors In Code
+    public DcMotor lf, rf, lb, rb, ls, armMotor; //Define Motors In Code
     public Gamepad g1, g2;
-    ColorSensor colorSensor, skyStoneColor;    // Hardware Device Object
-    ColorSensor colorRev, colorLineRev;
-    DistanceSensor sensorDistance, distanceLineRev;
+    //ColorSensor colorSensor, skyStoneColor;    // Hardware Device Object
+    //ColorSensor colorRev, colorLineRev;
+    //DistanceSensor sensorDistance, distanceLineRev;
 
-    public Servo clawL, clawR, hook, capServo;
+
+    public Servo wobbleClaw;
+    //public Servo clawL, clawR, hook, capServo;
 
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime hookTime = new ElapsedTime();
@@ -111,12 +113,10 @@ public abstract class TeleOp_Abstract extends OpMode {
         lb = hardwareMap.dcMotor.get("lb");
         rb = hardwareMap.dcMotor.get("rb");
         ls = hardwareMap.dcMotor.get("ls");
-        //Servo Define
-        clawL = hardwareMap.servo.get("clawL");
-        clawR = hardwareMap.servo.get("clawR");
 
-        hook = hardwareMap.servo.get("hook");
-        capServo = hardwareMap.servo.get("capper");
+        armMotor = hardwareMap.dcMotor.get("armMotor");
+
+        wobbleClaw = hardwareMap.servo.get("wobbleClaw");
 
 
         //Gyro Stuff
@@ -152,7 +152,10 @@ public abstract class TeleOp_Abstract extends OpMode {
         rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         ls.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
+
+    /*
     public void initColor(){
         colorSensor = hardwareMap.get(ColorSensor.class, "color");
         skyStoneColor = hardwareMap.get(ColorSensor.class, "SkyColor");
@@ -165,7 +168,7 @@ public abstract class TeleOp_Abstract extends OpMode {
 
 
 
-    }
+    }*/
 
     private double getHeading()
     {
@@ -334,7 +337,7 @@ public abstract class TeleOp_Abstract extends OpMode {
         }
     }
 
-    public void gabeClaw(){ //claw is digital, does not work with 1 and 0 position settings
+    /*public void gabeClaw(){ //claw is digital, does not work with 1 and 0 position settings
         if (gamepad1.a) {
             clawR.setPosition(.8); //open claw
             clawL.setPosition(.2);
@@ -349,12 +352,14 @@ public abstract class TeleOp_Abstract extends OpMode {
         //}
 
     }
+    */
+
 
     public void gabeSlide(){
         ls.setPower(gamepad1.right_stick_x);
     }
 
-    public void gabeHook(){
+    /*public void gabeHook(){
 
         if (gamepad1.x){
             if (up) {
@@ -368,6 +373,8 @@ public abstract class TeleOp_Abstract extends OpMode {
             }
         }
     }
+    */
+
 
     public void cooldown(){
         boolean wait = false;
@@ -392,24 +399,19 @@ public abstract class TeleOp_Abstract extends OpMode {
 
     }
 
+
     public void claw() {
         if (gamepad2.a) {
-            clawR.setPosition(.3); //open claw
-            clawL.setPosition(.75);
+            wobbleClaw.setPosition(0.1);
             telemetry.addLine("Claw Open");
         }
         else if (gamepad2.b) {
-            clawR.setPosition(.8); // close claw
-            clawL.setPosition(.2);
+            wobbleClaw.setPosition(0.9);
             telemetry.addLine("Claw Closed");
         }
 
 
-        if(gamepad2.y){
-            clawR.setPosition(.65); //partial claw
-            clawL.setPosition(.40);
-            telemetry.addLine("Claw Partial");
-        }
+
 
         /*if (gamepad2.a && clawTime.milliseconds()>500){
             cPos++;
@@ -440,9 +442,12 @@ public abstract class TeleOp_Abstract extends OpMode {
 
 
 
+
+
+
     public void linearSlide() {
 
-        if (gamepad2.right_bumper && slideTime.milliseconds()>500){
+        /*if (gamepad2.right_bumper && slideTime.milliseconds()>500){
             lMod++;
             slideTime.reset();
         }
@@ -453,7 +458,10 @@ public abstract class TeleOp_Abstract extends OpMode {
             ls.setPower(gamepad2.left_stick_y);
         }else if (lMod == 1){
             ls.setPower(gamepad2.left_stick_y * 0.5);
-        }
+        }*/
+
+        ls.setPower(-gamepad2.left_stick_y);
+        armMotor.setPower(gamepad2.right_stick_y *0.5);
         telemetry.addData("State:", lMod); // Ask Andy What telemetry. addData is
     }                                             // It sends a message to the phone
 
@@ -540,25 +548,11 @@ public abstract class TeleOp_Abstract extends OpMode {
 
     }
 
+
     public void hook(){
-        /*if (gamepad2.x){
-            hook.setPosition(0.9);
-        }
-        if (gamepad2.y){
-            hook.setPosition(0.1);
-        }*/
-        if (gamepad2.x){
-            if (up) {
-                hook.setPosition(.9);
-            }else{
-                hook.setPosition(.1); //Range for digital servo is 0.1 - 0.9
-            }
-            if (hookTime.milliseconds()>500) {
-                up = !up;
-                hookTime.reset();
-            }
-        }
+
     }
+
 
 
 
@@ -600,45 +594,7 @@ public abstract class TeleOp_Abstract extends OpMode {
         //    NormalizedRGBA colors = colorRev.getNormalizedColors();
 
     }
-    public void capServoMove() {
 
-        if (gamepad2.left_bumper) {
-            if (gamepad2.left_bumper) {
-                if(capServo.getPosition()>.1){//at .25
-                    capServo.setPosition(0);
-                    while (gamepad2.left_bumper){       //this loop ensures that if the button is held down, the servo changes position only once
-                        telemetry.addData("capServo","at 0");   //it's stuck inside the loop until the button is released so it won't flop back and forth
-                        telemetry.update();
-                    }
-                }else{
-                    capServo.setPosition(.9);
-                    while (gamepad2.left_bumper){       //this is the same as above
-                        telemetry.addData("capServo","at .25");
-                        telemetry.update();
-                    }
-                }
-            }
-            telemetry.addData("State:", lMod);
-    /*public void testRevColor(){
-        telemetry.addLine()
-                .addData("Red", color_sensor.red())   // Red channel value
-                .addData("\tGreen", color_sensor.green()) // Green channel value
-                .addData("\tBlue", color_sensor.blue());  // Blue channel value
-
-        telemetry.addLine()
-                .addData("Luminosity/Alpha",color_sensor.alpha()) // Total luminosity
-                .addData("Total", color_sensor.argb())  // Combined color value
-                .addData("Hue", hsvValues[0]);
-        telemetry.update();
-    }
-
-    public void testModernColor(){
-        Color.RGBToHSV(color_sensor.red()*8, color_sensor.green()*8, color_sensor.blue()*8, hsvValues);
-    }*/
-
-        }
-
-    }
 //I had one job, but I can't remember that one job ; code the robot_;
 
 
