@@ -55,8 +55,8 @@ public abstract class Auto_Abstract extends LinearOpMode {
     public static final int STRAFE_RIGHT = 2;
     public static final int STRAFE_LEFT = 3;
     //static final int FREEFORM = 4;
-    private static final int UP = 0;
-    private static final int DOWN = 1;
+    public static final int UP = 0;
+    public static final int DOWN = 1;
     static final int CLOSE = 0;
     static final int OPEN = 1;
     static final int PART = 2;
@@ -1142,17 +1142,29 @@ public abstract class Auto_Abstract extends LinearOpMode {
     public void claw(int state){
         switch (state){
             case CLOSE:
-                wobbleClaw.setPosition(0.1);
+                wobbleClaw.setPosition(0.9);
                 sleep(500);
                 break;
             case OPEN:
-                wobbleClaw.setPosition(0.9);
+                wobbleClaw.setPosition(0.1);
                 sleep(500);
                 break;
 
         }
 
     }
+
+    public void wobbleArm(int direction, long time, double power){
+        if (direction == UP){
+            armMotor.setPower(power);
+            sleep((long) time);
+        }else{
+            armMotor.setPower(-power);
+            sleep((long) time);
+        }
+    }
+
+
 
     private double getHeading()
     {
