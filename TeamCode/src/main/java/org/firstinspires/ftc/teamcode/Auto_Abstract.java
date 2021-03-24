@@ -28,7 +28,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
     //variables
     public DcMotor lf, rf, lb, rb, ls, armMotor; //Define Motors In Code
     public Gamepad g1, g2;
-    ColorSensor colorSensor, bottomRingColor, topRingColor;    // Hardware Device Object
+    public ColorSensor colorSensor, bottomRingColor, topRingColor;    // Hardware Device Object
     //ColorSensor colorRev, colorLineRev;
     //DistanceSensor sensorDistance, distanceLineRev;
 
@@ -79,7 +79,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
     private Orientation lastAngles = new Orientation();
     private double globalAngle = .30;
 
-    //private double startOrient = 0;
+    //private double Orient = 0;
 
 
     static boolean LEFT = false;
@@ -431,6 +431,15 @@ public abstract class Auto_Abstract extends LinearOpMode {
         armMotor = hardwareMap.dcMotor.get("armMotor");
 
         wobbleClaw = hardwareMap.servo.get("wobbleClaw");
+
+        colorSensor = hardwareMap.get(ColorSensor.class, "color");
+        colorSensor.enableLed(bLedOn);
+
+        bottomRingColor = hardwareMap.get(ColorSensor.class, "color");
+        bottomRingColor.enableLed(bLedOn);
+
+        topRingColor = hardwareMap.get(ColorSensor.class, "color");
+        topRingColor.enableLed(bLedOn);
 
         //------------------------------------------------------------------------------------------------------//
         //Gyro Stuff
