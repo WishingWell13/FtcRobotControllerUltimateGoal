@@ -33,6 +33,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
     //DistanceSensor sensorDistance, distanceLineRev;
 
 
+
     public Servo wobbleClaw;
     private BNO055IMU imu;
 
@@ -88,9 +89,9 @@ public abstract class Auto_Abstract extends LinearOpMode {
     static boolean GLIDE = true;
     static boolean BREAK = false;
 
-    public static int NO_RING = 0;
-    public static int ONE_RING = 1;
-    public static int THREE_RING = 2;
+    public static final int NO_RING = 0;
+    public static final int ONE_RING = 1;
+    public static final int THREE_RING = 2;
 
 
 

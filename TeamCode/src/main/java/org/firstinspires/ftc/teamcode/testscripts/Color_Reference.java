@@ -73,7 +73,7 @@ public class Color_Reference extends Auto_Abstract {
 
 
         // Set the LED in the beginning
-        colorSensor.enableLed(bLedOn);
+        //colorSensor.enableLed(bLedOn);
 
         final double SCALE_FACTOR = 255;
 
@@ -117,7 +117,7 @@ public class Color_Reference extends Auto_Abstract {
             telemetry.addData("Red Bottom ", bottomRingColor.red());
             telemetry.addData("Green Bottom ", bottomRingColor.green());
             telemetry.addData("Blue Bottom ", bottomRingColor.blue());
-            telemetry.addData("Hue Bottom ", hsvTop[0]);
+            telemetry.addData("Hue Bottom ", hsvBottom[0]);
 
             telemetry.addData("LED Top ", bLedOn ? "On" : "Off");
             telemetry.addData("Clear Top ", topRingColor.alpha());

@@ -17,7 +17,21 @@ public class AutoRedRight extends Auto_Abstract {
         //Move Forward one square
         drive(0.7, TILE_WIDTH_YES_TEETH *2 - ROBOTLENGTH, FORWARD, false, false);
 
-        int target = 0;
+        int target = NO_RING;
+
+        switch (target){
+            case NO_RING:
+
+                break;
+
+            case ONE_RING:
+
+                break;
+
+            case THREE_RING:
+
+                break;
+        }
         //Read stack
 
         //Navigate to target zone
