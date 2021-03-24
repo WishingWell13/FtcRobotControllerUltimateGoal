@@ -32,6 +32,8 @@ public abstract class TeleOp_Abstract extends OpMode {
 
     public DcMotor lf, rf, lb, rb, ls, armMotor; //Define Motors In Code
     public Gamepad g1, g2;
+    public ColorSensor colorSensor, bottomRingColor, topRingColor;
+
     //ColorSensor colorSensor, skyStoneColor;    // Hardware Device Object
     //ColorSensor colorRev, colorLineRev;
     //DistanceSensor sensorDistance, distanceLineRev;

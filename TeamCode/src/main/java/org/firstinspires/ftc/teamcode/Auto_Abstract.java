@@ -88,6 +88,10 @@ public abstract class Auto_Abstract extends LinearOpMode {
     static boolean GLIDE = true;
     static boolean BREAK = false;
 
+    public static int NO_RING = 0;
+    public static int ONE_RING = 1;
+    public static int THREE_RING = 2;
+
 
 
 
@@ -435,10 +439,10 @@ public abstract class Auto_Abstract extends LinearOpMode {
         colorSensor = hardwareMap.get(ColorSensor.class, "color");
         colorSensor.enableLed(bLedOn);
 
-        bottomRingColor = hardwareMap.get(ColorSensor.class, "color");
+        bottomRingColor = hardwareMap.get(ColorSensor.class, "colorBottom");
         bottomRingColor.enableLed(bLedOn);
 
-        topRingColor = hardwareMap.get(ColorSensor.class, "color");
+        topRingColor = hardwareMap.get(ColorSensor.class, "colorTop");
         topRingColor.enableLed(bLedOn);
 
         //------------------------------------------------------------------------------------------------------//
@@ -1104,6 +1108,27 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
     public void driveRange(double power, double distance, int direction, int error){
 
+    }
+
+    public int readRings(){
+        if (topColorSeeRing()){
+            telemetry.addLine("I see three rings");
+            return THREE_RING;
+        }else if(botColorSeeRing()){
+            telemetry.addLine("I see one ring");
+            return ONE_RING;
+        }else{
+            telemetry.addLine("I see no rings");
+            return NO_RING;
+        }
+    }
+
+    public boolean botColorSeeRing(){
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean topColorSeeRing(){
+        throw new UnsupportedOperationException();
     }
 
 
