@@ -462,8 +462,8 @@ public abstract class TeleOp_Abstract extends OpMode {
             ls.setPower(gamepad2.left_stick_y * 0.5);
         }*/
 
-        ls.setPower(-gamepad2.left_stick_y);
-        armMotor.setPower(gamepad2.right_stick_y *0.5);
+        ls.setPower(-gamepad2.right_stick_y);
+        armMotor.setPower(-gamepad2.left_stick_y *0.5);
         telemetry.addData("State:", lMod); // Ask Andy What telemetry. addData is
     }                                             // It sends a message to the phone
 

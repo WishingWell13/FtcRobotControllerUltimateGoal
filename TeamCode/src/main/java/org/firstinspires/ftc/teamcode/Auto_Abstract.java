@@ -1125,11 +1125,12 @@ public abstract class Auto_Abstract extends LinearOpMode {
     }
 
     public boolean botColorSeeRing(){
-        throw new UnsupportedOperationException();
+
+        return bottomRingColor.red()>1100;
     }
 
     public boolean topColorSeeRing(){
-        throw new UnsupportedOperationException();
+        return topRingColor.red()>500;
     }
 
 
@@ -1158,9 +1159,13 @@ public abstract class Auto_Abstract extends LinearOpMode {
         if (direction == UP){
             armMotor.setPower(power);
             sleep((long) time);
+            armMotor.setPower(0);
+
         }else{
             armMotor.setPower(-power);
             sleep((long) time);
+            armMotor.setPower(0);
+
         }
     }
 
