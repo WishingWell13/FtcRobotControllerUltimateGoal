@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
-
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 //import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -91,7 +89,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
     public static final int NO_RING = 0;
     public static final int ONE_RING = 1;
-    public static final int THREE_RING = 2;
+    public static final int FOUR_RING = 2;
 
 
 
@@ -123,8 +121,8 @@ public abstract class Auto_Abstract extends LinearOpMode {
      * */
 
     //Robot Info
-    public static final double ROBOTLENGTH = 18;
-    public static final double ROBOTWIDTH = 18;
+    public static final double ROBOTLENGTH = 13;
+    public static final double ROBOTWIDTH = 12;
 
     //Field Info
     public static final double TILE_WIDTH_NO_TEETH = 22.75;
@@ -1113,8 +1111,8 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
     public int readRings(){
         if (topColorSeeRing()){
-            telemetry.addLine("I see three rings");
-            return THREE_RING;
+            telemetry.addLine("I see four rings");
+            return FOUR_RING;
         }else if(botColorSeeRing()){
             telemetry.addLine("I see one ring");
             return ONE_RING;
@@ -1126,11 +1124,11 @@ public abstract class Auto_Abstract extends LinearOpMode {
 
     public boolean botColorSeeRing(){
 
-        return bottomRingColor.red()>1100;
+        return bottomRingColor.alpha()>400;
     }
 
     public boolean topColorSeeRing(){
-        return topRingColor.red()>500;
+        return topRingColor.alpha()>400;
     }
 
 
@@ -1152,6 +1150,32 @@ public abstract class Auto_Abstract extends LinearOpMode {
                 break;
 
         }
+
+    }
+
+    public void getColorValues(){
+
+
+        // send the info back to driver station using telemetry function.
+
+        telemetry.addData("Clear ", colorSensor.alpha());
+        telemetry.addData("Red  ", colorSensor.red());
+        telemetry.addData("Green ", colorSensor.green());
+        telemetry.addData("Blue ", colorSensor.blue());
+        telemetry.addData("Hue ", hsvValues[0]);
+
+
+        telemetry.addData("Clear Bottom ", bottomRingColor.alpha());
+        telemetry.addData("Red Bottom ", bottomRingColor.red());
+        telemetry.addData("Green Bottom ", bottomRingColor.green());
+        telemetry.addData("Blue Bottom ", bottomRingColor.blue());
+
+
+
+        telemetry.addData("Clear Top ", topRingColor.alpha());
+        telemetry.addData("Red Top ", topRingColor.red());
+        telemetry.addData("Green Top ", topRingColor.green());
+        telemetry.addData("Blue Top ", topRingColor.blue());
 
     }
 
