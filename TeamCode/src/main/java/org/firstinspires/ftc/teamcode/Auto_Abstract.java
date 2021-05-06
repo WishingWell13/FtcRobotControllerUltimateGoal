@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.sun.tools.javac.tree.DCTree;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -91,7 +92,7 @@ public abstract class Auto_Abstract extends LinearOpMode {
     public static final int ONE_RING = 1;
     public static final int FOUR_RING = 2;
 
-
+    public DcMotor[] driveMotors = {lf, lb, rf, rb};
 
 
 
@@ -513,6 +514,46 @@ public abstract class Auto_Abstract extends LinearOpMode {
         return count;
     }
 
+    public void resetEncoders(DcMotor[] temp){
+        for (int i = 0; i < temp.length; i++){
+            temp[i].setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            temp[i].setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+
+    public void setMotorPower(DcMotor[] temp, double power){
+        for (int i = 0; i < temp.length; i++){
+            temp[i].setPower(power);
+            temp[i].setPower(power);
+        }
+    }
+
+    public void setZeroPowerBehavior(DcMotor[] temp, boolean glide){
+        if (glide){
+            lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }else{
+            lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        }
+    }
+
+    public void setRunMode(DcMotor.RunMode runMode, DcMotor... temp){
+        for (int i = 0; i < temp.length; i++){
+            temp[i].setMode(runMode);
+        }
+    }
+
+    public void setRunMode(DcMotor[] temp, DcMotor.RunMode runMode){
+        for (int i = 0; i < temp.length; i++){
+            temp[i].setMode(runMode);
+        }
+    }
+
     public void drive(double power, double distance, int direction, boolean glide, boolean part) { //parameters: When you use the function, the code will ask for these two variables
 
         lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -750,7 +791,105 @@ public abstract class Auto_Abstract extends LinearOpMode {
         rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    public void drive(double power, double distance, int direction, boolean glide, boolean part, double time, int interval){
 
+        ElapsedTime elapsedTime = new ElapsedTime();
+        elapsedTime.reset();
+
+        resetEncoders(driveMotors);
+        setMotorPower(driveMotors, 0);
+        setZeroPowerBehavior(driveMotors, glide);
+
+        double lfPower = 0;
+        double rfPower = 0;
+        double lbPower = 0;
+        double rbPower = 0;
+
+        double slowDist = 4 * COUNTS_PER_INCH;
+
+        if (!part){
+            distance += (slowDist/COUNTS_PER_INCH);
+        }
+
+        switch(direction){
+            case FORWARD:
+                lf.setTargetPosition((int) ((COUNTS_PER_INCH * -distance) + slowDist)); //distance needs to be in inches
+                rf.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist)); //For some reason, going forward gives negative encoder values
+                lb.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist));
+                rb.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist));
+
+                lfPower = power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = power;
+                break;
+
+            case BACKWARDS:
+                lf.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist)); //distance needs to be in inches
+                rf.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+                lb.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+                rb.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+                lfPower = -power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = -power;
+                break;
+            case STRAFE_RIGHT: // What is case?
+                lf.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist)); //distance needs to be in inches
+                rf.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+                lb.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+                rb.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist));
+
+                lfPower = power;
+                rfPower = -power;
+                lbPower = -power;
+                rbPower = power;
+
+
+
+                break;
+            case STRAFE_LEFT:
+                lf.setTargetPosition((int) (COUNTS_PER_INCH * distance - slowDist)); //distance needs to be in inches
+                rf.setTargetPosition((int) (COUNTS_PER_INCH * -distance + slowDist));
+                lb.setTargetPosition((int) (COUNTS_PER_INCH * -distance +slowDist));
+                rb.setTargetPosition((int) (COUNTS_PER_INCH * distance- slowDist));
+
+                lfPower = -power;
+                rfPower = power;
+                lbPower = power;
+                rbPower = -power;
+                break;
+        }
+
+        //Sign of setPower does not matter for RUN_TO_POSITION
+
+        lf.setPower(lfPower);
+        rf.setPower(rfPower);
+        lb.setPower(lbPower);
+        rb.setPower(rbPower);
+
+        setRunMode(driveMotors, DcMotor.RunMode.RUN_TO_POSITION);
+
+        telemetry.addLine("****begining loop****1");
+        telemetry.update();
+        //sleep(1000);
+
+        while (opModeIsActive()&& (countMotorsBusy(lf,lb,rf,rb) > 3)) {
+            idle();
+            telemetry.addData("rb",rb.getCurrentPosition());
+            telemetry.addData("rf",rf.getCurrentPosition());
+            telemetry.addData("lf",lf.getCurrentPosition());
+            telemetry.addData("lb",lb.getCurrentPosition());
+            telemetry.update();
+        }
+
+        resetEncoders(driveMotors);
+
+        setMotorPower(driveMotors, 0);
+
+        telemetry.addLine("****ended loop****1");
+        telemetry.update();
+    }
 
     public void encoderTurn180(double power){
         lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
